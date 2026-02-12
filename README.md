@@ -1,176 +1,155 @@
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Oficina Pro</title>
+    <title>Oficina Pro | Gestão Inteligente</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        body { font-family: 'Inter', sans-serif; }
         .aba { display: none; }
-        .aba.ativa { display: block; }
+        .aba.ativa { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .sidebar-item.active { background-color: #3730a3; border-right: 4px solid #818cf8; }
     </style>
 </head>
-<body class="bg-gray-100 flex h-screen m-0 overflow-hidden font-sans">
+<body class="bg-[#f8fafc] flex h-screen overflow-hidden text-slate-700">
 
-    <nav class="w-64 bg-slate-900 text-white flex flex-col shadow-2xl">
-        <div class="p-6 border-b border-slate-800 text-center font-bold text-xl text-blue-400">
-            OFICINA V4
+    <aside class="w-72 bg-[#1e1b4b] text-white flex flex-col shadow-2xl z-20">
+        <div class="p-8 text-center">
+            <div class="inline-flex items-center justify-center w-12 h-12 bg-indigo-500 rounded-xl mb-3 shadow-lg">
+                <i class="fa-solid fa-bolt-lightning text-xl"></i>
+            </div>
+            <h1 class="text-xl font-extrabold tracking-tight">OFICINA<span class="text-indigo-400">PRO</span></h1>
         </div>
-        <div class="p-4 space-y-2 flex-1">
-            <button onclick="mudar('p')" class="w-full text-left p-3 rounded hover:bg-slate-800 transition flex items-center gap-3">
-                <i class="fa-solid fa-chart-line text-blue-400"></i> Painel
+
+        <nav class="flex-1 px-4 space-y-1 mt-4">
+            <button onclick="mudar('p', this)" class="sidebar-item active w-full text-left p-4 rounded-xl transition-all flex items-center gap-4 hover:bg-white/10 group">
+                <i class="fa-solid fa-house text-indigo-400"></i>
+                <span class="font-medium">Painel Principal</span>
             </button>
-            <button onclick="mudar('v')" class="w-full text-left p-3 rounded hover:bg-slate-800 transition flex items-center gap-3">
-                <i class="fa-solid fa-cart-shopping text-green-400"></i> Vendas
+            <button onclick="mudar('v', this)" class="sidebar-item w-full text-left p-4 rounded-xl transition-all flex items-center gap-4 hover:bg-white/10 group">
+                <i class="fa-solid fa-cart-shopping text-indigo-400"></i>
+                <span class="font-medium">Registrar Venda</span>
             </button>
-            <button onclick="mudar('e')" class="w-full text-left p-3 rounded hover:bg-slate-800 transition flex items-center gap-3">
-                <i class="fa-solid fa-box text-orange-400"></i> Estoque
+            <button onclick="mudar('e', this)" class="sidebar-item w-full text-left p-4 rounded-xl transition-all flex items-center gap-4 hover:bg-white/10 group">
+                <i class="fa-solid fa-boxes-stacked text-indigo-400"></i>
+                <span class="font-medium">Estoque e Peças</span>
+            </button>
+        </nav>
+
+        <div class="p-6">
+            <button onclick="resetar()" class="w-full py-3 rounded-lg text-xs font-bold text-red-400 hover:bg-red-500/10 transition-colors uppercase">
+                Limpar Sistema
             </button>
         </div>
-        <div class="p-4">
-            <button onclick="resetar()" class="w-full text-xs text-red-500 hover:text-red-300 underline">
-                Limpar Banco de Dados
-            </button>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto relative bg-slate-50">
+        <header class="sticky top-0 bg-white/80 backdrop-blur-md z-10 px-10 py-6 border-b border-slate-200 flex justify-between items-center">
+            <h2 id="titulo-pagina" class="text-2xl font-bold text-slate-800">Boas-vindas ao Painel</h2>
+            <span id="data-display" class="text-sm font-medium text-slate-500 bg-slate-100 px-4 py-2 rounded-full"></span>
+        </header>
+
+        <div class="p-10">
+            <section id="p" class="aba ativa">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                        <p class="text-slate-400 font-bold uppercase text-xs tracking-wider">Faturamento Total</p>
+                        <h3 id="txt-caixa" class="text-4xl font-black text-slate-800 mt-2">R$ 0,00</h3>
+                    </div>
+                    <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                        <p class="text-slate-400 font-bold uppercase text-xs tracking-wider">Vendas Realizadas</p>
+                        <h3 id="txt-vendas" class="text-4xl font-black text-slate-800 mt-2">0</h3>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8">
+                    <h4 class="font-bold text-slate-800 mb-6 italic">Últimos Registros:</h4>
+                    <div id="lista-historico" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <section id="v" class="aba">
+                <div class="max-w-md bg-white p-10 rounded-3xl shadow-xl border border-slate-100 mx-auto">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-6 text-center">Nova Venda</h3>
+                    <select id="sel-venda" class="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-2xl mb-6 outline-none focus:border-indigo-500 transition-all"></select>
+                    <button onclick="fazerVenda()" class="w-full bg-indigo-600 text-white font-black p-5 rounded-2xl shadow-lg hover:bg-indigo-700 active:scale-95 transition-all">CONCLUIR VENDA</button>
+                </div>
+            </section>
+
+            <section id="e" class="aba">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-3xl shadow-md border border-slate-100 h-fit">
+                        <h3 class="font-bold mb-4">Adicionar Item</h3>
+                        <input id="in-nome" type="text" placeholder="Nome" class="w-full border p-3 rounded-xl mb-3 outline-none focus:border-indigo-500">
+                        <input id="in-preco" type="number" placeholder="Preço" class="w-full border p-3 rounded-xl mb-4 outline-none focus:border-indigo-500">
+                        <button onclick="salvarItem()" class="w-full bg-indigo-600 text-white font-bold p-3 rounded-xl hover:bg-indigo-700">SALVAR</button>
+                    </div>
+                    <div class="lg:col-span-2 bg-white rounded-3xl shadow-md overflow-hidden">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b border-slate-100">
+                                <tr><th class="p-6">Nome</th><th class="p-6 text-right">Preço</th><th class="p-6"></th></tr>
+                            </thead>
+                            <tbody id="lista-e" class="divide-y divide-slate-50"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
-    </nav>
-
-    <main class="flex-1 p-10 overflow-auto">
-        
-        <section id="p" class="aba ativa">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800">Painel Financeiro</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-white p-8 rounded-xl shadow-lg border-l-8 border-green-500">
-                    <p class="text-gray-400 font-bold uppercase text-sm">Total em Caixa</p>
-                    <h3 id="txt-caixa" class="text-5xl font-black text-green-600 mt-2">R$ 0,00</h3>
-                </div>
-                <div class="bg-white p-8 rounded-xl shadow-lg border-l-8 border-blue-500">
-                    <p class="text-gray-400 font-bold uppercase text-sm">Vendas Realizadas</p>
-                    <h3 id="txt-vendas" class="text-5xl font-black text-blue-600 mt-2">0</h3>
-                </div>
-            </div>
-        </section>
-
-        <section id="v" class="aba">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800">Nova Venda</h2>
-            <div class="bg-white p-8 rounded-xl shadow-lg max-w-lg">
-                <label class="block mb-2 font-bold text-gray-700">Escolha o item:</label>
-                <select id="sel-venda" class="w-full border-2 border-gray-200 p-4 rounded-lg mb-6 text-lg focus:border-green-500 outline-none">
-                </select>
-                <button onclick="fazerVenda()" class="w-full bg-green-600 text-white font-bold p-5 rounded-lg text-xl hover:bg-green-700 shadow-lg transform active:scale-95 transition">
-                    CONCLUIR VENDA 💰
-                </button>
-            </div>
-        </section>
-
-        <section id="e" class="aba">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800">Gerenciar Estoque</h2>
-            <div class="bg-white p-8 rounded-xl shadow-lg max-w-md mb-10">
-                <div class="space-y-4">
-                    <input id="in-nome" type="text" placeholder="Nome da Peça ou Serviço" class="w-full border p-3 rounded-lg outline-none focus:border-blue-500">
-                    <input id="in-preco" type="number" placeholder="Preço (Ex: 150.00)" class="w-full border p-3 rounded-lg outline-none focus:border-blue-500">
-                    <button onclick="salvarItem()" class="w-full bg-blue-600 text-white font-bold p-3 rounded-lg hover:bg-blue-700 transition">
-                        CADASTRAR ITEM
-                    </button>
-                </div>
-            </div>
-            
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-slate-800 text-white">
-                        <tr>
-                            <th class="p-4">Produto / Serviço</th>
-                            <th class="p-4 text-right">Preço Unitário</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lista-e" class="divide-y divide-gray-100">
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
     </main>
 
     <script>
-        // Armazenamento Local
         let DB_ITENS = JSON.parse(localStorage.getItem('oficina_it')) || [];
         let DB_VENDAS = JSON.parse(localStorage.getItem('oficina_ve')) || [];
 
-        // Atualiza a tela
         function atualizar() {
-            // Financeiro
             let soma = DB_VENDAS.reduce((a, b) => a + Number(b.preco), 0);
-            document.getElementById('txt-caixa').innerText = "R$ " + soma.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+            document.getElementById('txt-caixa').innerText = soma.toLocaleString('pt-BR', {style: 'currency', currency: 'BRL'});
             document.getElementById('txt-vendas').innerText = DB_VENDAS.length;
+            document.getElementById('data-display').innerText = new Date().toLocaleDateString('pt-br', { weekday: 'long', day: 'numeric', month: 'long' });
 
-            // Tabela Estoque
-            document.getElementById('lista-e').innerHTML = DB_ITENS.map(i => `
-                <tr class="hover:bg-gray-50 transition">
-                    <td class="p-4 font-medium">${i.nome}</td>
-                    <td class="p-4 text-right font-bold text-blue-600">R$ ${Number(i.preco).toFixed(2)}</td>
-                </tr>
-            `).join('');
-
-            // Menu de Vendas
-            let select = document.getElementById('sel-venda');
-            if(DB_ITENS.length === 0) {
-                select.innerHTML = '<option value="">Cadastre itens primeiro no estoque!</option>';
-            } else {
-                select.innerHTML = DB_ITENS.map((i, idx) => `
-                    <option value="${idx}">${i.nome} - R$ ${Number(i.preco).toFixed(2)}</option>
-                `).join('');
-            }
+            document.getElementById('lista-historico').innerHTML = DB_VENDAS.slice().reverse().slice(0, 5).map(v => `<div class="p-4 bg-slate-50 rounded-xl flex justify-between border border-slate-100"><span>${v.nome}</span><span class="font-bold">R$ ${Number(v.preco).toFixed(2)}</span></div>`).join('');
+            document.getElementById('lista-e').innerHTML = DB_ITENS.map((i, idx) => `<tr><td class="p-6 font-semibold">${i.nome}</td><td class="p-6 text-right font-bold text-indigo-600">R$ ${Number(i.preco).toFixed(2)}</td><td class="p-6 text-center"><button onclick="deletarItem(${idx})" class="text-red-300 hover:text-red-500"><i class="fa-solid fa-trash-can"></i></button></td></tr>`).join('');
+            document.getElementById('sel-venda').innerHTML = DB_ITENS.map((i, idx) => `<option value="${idx}">${i.nome} (R$ ${Number(i.preco).toFixed(2)})</option>`).join('');
         }
 
-        // Troca de abas
-        function mudar(id) {
+        function mudar(abaId, btn) {
             document.querySelectorAll('.aba').forEach(a => a.classList.remove('ativa'));
-            document.getElementById(id).classList.add('ativa');
+            document.getElementById(abaId).classList.add('ativa');
+            document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             atualizar();
         }
 
-        // Salva novo item
         function salvarItem() {
             let n = document.getElementById('in-nome').value;
             let p = document.getElementById('in-preco').value;
-            
-            if(!n || !p) {
-                alert("Preencha o nome e o preço corretamente!");
-                return;
-            }
-
+            if(!n || !p) return alert("Preencha tudo!");
             DB_ITENS.push({nome: n, preco: p});
             localStorage.setItem('oficina_it', JSON.stringify(DB_ITENS));
-            
-            document.getElementById('in-nome').value = '';
-            document.getElementById('in-preco').value = '';
+            document.getElementById('in-nome').value = ''; document.getElementById('in-preco').value = '';
             atualizar();
-            alert("Item adicionado ao estoque!");
         }
 
-        // Faz uma venda
+        function deletarItem(idx) {
+            DB_ITENS.splice(idx, 1);
+            localStorage.setItem('oficina_it', JSON.stringify(DB_ITENS));
+            atualizar();
+        }
+
         function fazerVenda() {
             let idx = document.getElementById('sel-venda').value;
-            if(idx === "" || !DB_ITENS[idx]) {
-                alert("Selecione um produto válido!");
-                return;
-            }
-
+            if(idx === "") return alert("Selecione um item!");
             DB_VENDAS.push(DB_ITENS[idx]);
             localStorage.setItem('oficina_ve', JSON.stringify(DB_VENDAS));
-            
-            alert("Venda concluída!");
-            mudar('p'); // Volta para o painel
+            alert("Vendido!");
+            mudar('p', document.querySelectorAll('.sidebar-item')[0]);
         }
 
-        // Reseta tudo
-        function resetar() {
-            if(confirm("Deseja apagar todos os dados permanentemente?")) {
-                localStorage.clear();
-                location.reload();
-            }
-        }
-
-        // Inicia o sistema carregando os dados
+        function resetar() { if(confirm("Apagar tudo?")) { localStorage.clear(); location.reload(); } }
         atualizar();
     </script>
 </body>
